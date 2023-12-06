@@ -1,26 +1,10 @@
-import * as fs from "fs";
-import { createInterface } from "node:readline";
+import { processFile } from "../utils.js";
 
 async function main(filePath: string) {
-  const fileStream = fs.createReadStream(filePath);
-
-  const rl = createInterface({
-    input: fileStream,
-    crlfDelay: Infinity,
-  });
-
-  let firstResult = 0;
-  let secondResult = 0;
-
-  for await (const line of rl) {
-    firstResult = firstResult + firstPuzzle(line);
-    secondResult = secondResult + secondPuzzle(line);
-  }
-  console.log("first puzzle: ", firstResult);
-  console.log("second puzzle: ", secondResult);
+  processFile(filePath, firstPuzzleSolver, secondPuzzleSolver);
 }
 
-function firstPuzzle(line: string) {
+function firstPuzzleSolver(line: string) {
   let firstNumber: number;
   for (let i = 0; i < line.length; i++) {
     if (!Number.isNaN(parseInt(line[i]))) {
@@ -53,7 +37,7 @@ const stringToDigit = {
   nine: 9,
 };
 
-function secondPuzzle(line: string) {
+function secondPuzzleSolver(line: string) {
   // build the object {indexAt: "string"}, considering also multiple matches for same string
   // es: for input "eightwothreetwo7abc" -> { '0': 'eight', '4': 'two', '7': 'three','12': 'two' }
   let indexStartingStrings: { [key: number]: string } = {};

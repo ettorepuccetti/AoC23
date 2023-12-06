@@ -8,14 +8,18 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
+      "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/01/main.ts",
       "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js"
-      ]
+      "outFiles": ["${workspaceFolder}/out/**/*.js"]
+    },
+
+    {
+      "type": "node-terminal",
+      "request": "launch",
+      "name": "Attach debug to ts-node",
+      "skipFiles": ["<node_internals>/**"],
+      "command": "npx ts-node --esm ${file}"
     }
   ]
 }

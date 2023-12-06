@@ -1,4 +1,4 @@
-import { processFile } from "../utils.js";
+import { processFile } from "../utils/utils.js";
 
 async function main(filePath: string) {
   processFile(filePath, firstPuzzleSolver, secondPuzzleSolver);
@@ -8,7 +8,7 @@ const MAX_N_OF_RED = 12;
 const MAX_N_OF_GREEN = 13;
 const MAX_N_OF_BLUE = 14;
 
-type Extraction = { red?: number; green?: number; blue?: number };
+type Extraction = { red: number; green: number; blue: number };
 
 function getGameId(line: string) {
   return parseInt(line.split(":")[0].split(" ")[1]);

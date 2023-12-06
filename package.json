@@ -5,6 +5,7 @@
     "tsc": "^2.0.4"
   },
   "dependencies": {
+    "chalk": "^5.3.0",
     "typescript": "^5.3.2"
   }
 }

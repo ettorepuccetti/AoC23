@@ -1,4 +1,4 @@
-import { processFile } from "../utils.js";
+import { processFile } from "../utils/utils.js";
 
 async function main(filePath: string) {
   processFile(filePath, firstPuzzleSolver, secondPuzzleSolver);
@@ -21,7 +21,7 @@ function firstPuzzleSolver(line: string) {
     }
   }
 
-  return 10 * firstNumber + secondNumber;
+  return 10 * firstNumber! + secondNumber!;
 }
 
 const stringToDigit = {
@@ -42,10 +42,12 @@ function secondPuzzleSolver(line: string) {
   // es: for input "eightwothreetwo7abc" -> { '0': 'eight', '4': 'two', '7': 'three','12': 'two' }
   let indexStartingStrings: { [key: number]: string } = {};
   Object.keys(stringToDigit).forEach((stringDigit) => {
-    const indexes = [...line.matchAll(new RegExp(stringDigit, "gi"))].map(
-      (a) => a.index
-    );
+    const indexes: (number | undefined)[] = [
+      ...line.matchAll(new RegExp(stringDigit, "gi")),
+    ].map((a) => a.index);
+
     indexes.forEach((index) => {
+      if (index === undefined) return;
       indexStartingStrings[index] = stringDigit;
     });
   });
@@ -53,7 +55,9 @@ function secondPuzzleSolver(line: string) {
   // getting starting index of first and last string represent digits
   // "eightwothreetwo7abc" -> 0, 12
   const firstStringPosition = parseInt(Object.keys(indexStartingStrings)[0]);
-  const lastStringPosition = parseInt(Object.keys(indexStartingStrings).at(-1));
+  const lastStringPosition = parseInt(
+    Object.keys(indexStartingStrings).at(-1)!
+  );
 
   // getting first and last number from string represent digits
   // "eightwothreetwo7abc" -> eight, two
@@ -62,8 +66,11 @@ function secondPuzzleSolver(line: string) {
 
   // converting to numbers
   // eight, two -> 8, 2
-  const firstNumberFromString = stringToDigit[firstString];
-  const lastNumberFromString = stringToDigit[lastString];
+  const firstNumberFromString =
+    stringToDigit[firstString as keyof typeof stringToDigit];
+
+  const lastNumberFromString =
+    stringToDigit[lastString as keyof typeof stringToDigit];
 
   // getting first and last number as digits, and their position
   // "eightwothreetwo7abc" -> 7 at index 15, 7 at index 15 (first and last are the same here)
@@ -89,23 +96,23 @@ function secondPuzzleSolver(line: string) {
 
   // if there are no numbers from string I return the result from digits
   if (firstNumberFromString === undefined) {
-    return 10 * firstNumberFromDigit + lastNumberFromDigit;
+    return 10 * firstNumberFromDigit! + lastNumberFromDigit!;
   }
 
   // check if occur first the string or the digit,
   //if `firstDigitPosition` is undefined, check is false and return `firstNumberFromString`
   const firstNumber =
-    firstDigitPosition < firstStringPosition
-      ? firstNumberFromDigit
+    firstDigitPosition! < firstStringPosition
+      ? firstNumberFromDigit!
       : firstNumberFromString;
 
   // check if occur last the string or the digit
   const lastNumber =
-    lastDigitPosition > lastStringPosition
+    lastDigitPosition! > lastStringPosition
       ? lastNumberFromDigit
       : lastNumberFromString;
 
-  return 10 * firstNumber + lastNumber;
+  return 10 * firstNumber + lastNumber!;
 }
 
 main("01/input.txt");

@@ -3,8 +3,8 @@ import { createInterface } from "readline";
 
 export async function processFile(
   filePath: string,
-  callBackFirstPuzzle: (line: string, index?: number) => number,
-  callBackSecondPuzzle: (line: string) => number
+  callBackFirstPuzzle?: (line: string) => number,
+  callBackSecondPuzzle?: (line: string) => number
 ) {
   const fileStream = createReadStream(filePath);
 

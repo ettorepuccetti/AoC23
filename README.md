@@ -1,5 +1,7 @@
 ## Run script from shell
 
+### `ts-node`
+
 ```
 npx ts-node --esm path_to_file
 ```
@@ -12,13 +14,17 @@ npx ts-node --esm path_to_file
 
 in `package.json`
 
-## Run with VScode debug
+### `tsx` (zero config typescript for node)
 
-1. `Launch Program`
+- install with `npm i -D tsx`
+- launch with `npx tsx path_to_file`
 
-Defined in `.vscode/launch.json`, it produce `out/main.js`.\
-Use to launch with breakpoint, but it auto focus the terminal tab, that contains no useful output, console log are in `DEBUG CONSOLE` tab.
+## Debug
 
-2. `Run current File` [DO NOT USE]
+### 1. `Launch Program`
 
-[!IMPORTANT] it relies on what there is in `out/main.js`, without recompile it.
+Defined in `.vscode/launch.json`, you need to specify there the file to debug. It produce `out/main.js`. It auto focus the terminal tab, that contains no useful output, console log are in `DEBUG CONSOLE` tab.
+
+### 2. `tsx`
+
+Defined in `.vscode/launch.json`, it launch the current opened file, output is promted in the integrated terminal/

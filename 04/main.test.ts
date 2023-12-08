@@ -1,4 +1,4 @@
-import { getCardNumber } from "./main.js";
+import { getCardNumber } from "./main";
 
 describe("getCardNumber", () => {
   it("should return the card number from the line", () => {

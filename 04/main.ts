@@ -63,19 +63,21 @@ export function getCardNumber(line: string): number {
 function processLine(
   line: string,
   internalState: CardInfoStore
-): { newInternalState: CardInfoStore } {
+): CardInfoStore {
+  const newInternalState: CardInfoStore = [];
+
   const cardNumber = getCardNumber(line);
 
   const winningNumbers: number[] = extractNumbers(line, "winning");
   const playedNumbers: number[] = extractNumbers(line, "played");
 
-  playedNumbers.forEach((played) => {
-    if (winningNumbers.indexOf(played) !== -1) {
-      internalState;
-    }
-  });
+  // playedNumbers.forEach((played) => {
+  //   if (winningNumbers.indexOf(played) !== -1) {
+  //     internalState;
+  //   }
+  // });
 
-  return { newInternalState };
+  return newInternalState;
 }
 
 secondPuzzleSolver("04/input.toy.txt");

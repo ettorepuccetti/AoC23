@@ -1,4 +1,4 @@
-import { createReadStream } from "fs";
+import { createReadStream, readFileSync } from "fs";
 import { createInterface } from "readline";
 
 export async function processFile(
@@ -22,8 +22,8 @@ export async function processFile(
     secondResult =
       secondResult + (callBackSecondPuzzle ? callBackSecondPuzzle(line) : 0);
   }
-  console.log("first puzzle: ", firstResult);
-  console.log("second puzzle: ", secondResult);
+  callBackFirstPuzzle && console.log("first puzzle: ", firstResult);
+  callBackSecondPuzzle && console.log("second puzzle: ", secondResult);
 }
 
 export async function processFileThreeLinesAtTime(
@@ -62,4 +62,10 @@ export async function processFileThreeLinesAtTime(
   result += callBack(prevLine, currentLine, nextLine);
 
   console.log("result: ", result);
+}
+
+export function syncReadFile(filename: string): string[] {
+  const contents = readFileSync(filename, "utf-8");
+  const arr = contents.split(/\r?\n/);
+  return arr;
 }

@@ -7,6 +7,5 @@
     "sourceMap": true,
     "moduleResolution": "Bundler",
     "esModuleInterop": true
-  },
-
+  }
 }

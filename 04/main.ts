@@ -1,6 +1,6 @@
 import { createReadStream } from "fs";
 import { createInterface } from "readline";
-import { processFile } from "../utils/utils.js";
+import { processFile } from "../utils/utils";
 
 type positionType = "winning" | "played";
 
@@ -31,16 +31,46 @@ function firstPuzzleSolver(line: string): number {
   return result;
 }
 
-interface CardInfo {
+export interface CardInfo {
   winningNumbers: number;
   replicas: number;
 }
 
-interface CardInfoStore {
+export interface CardInfoStore {
   [key: number]: CardInfo;
 }
 
-async function secondPuzzleSolver(filePath: string): Promise<number> {
+export function getCardNumber(line: string): number {
+  return parseInt(line.split(":")[0].split(" ").at(-1)!);
+}
+
+export function processLine(line: string): CardInfo {
+  const result: CardInfo = { replicas: 1, winningNumbers: 0 };
+
+  const winningNumbers: number[] = extractNumbers(line, "winning");
+  const playedNumbers: number[] = extractNumbers(line, "played");
+
+  playedNumbers.forEach((played) => {
+    if (winningNumbers.indexOf(played) !== -1) {
+      result.winningNumbers++;
+    }
+  });
+
+  return result;
+}
+
+export function updateReplicas(state: CardInfoStore, cardNumber: number): void {
+  const numberToAdd = state[cardNumber].replicas;
+  const numberOfCardsToUpdate = state[cardNumber].winningNumbers;
+  for (let i = 1; i <= numberOfCardsToUpdate; i++) {
+    if (state[cardNumber + i] === undefined) {
+      continue;
+    }
+    state[cardNumber + i].replicas += numberToAdd;
+  }
+}
+
+async function secondPuzzleSolver(filePath: string) {
   const fileStream = createReadStream(filePath);
 
   const rl = createInterface({
@@ -48,37 +78,24 @@ async function secondPuzzleSolver(filePath: string): Promise<number> {
     crlfDelay: Infinity,
   });
 
-  let result = 0;
   let internalState: CardInfoStore = [];
+
+  // build the state with no info on the replicas
   for await (const line of rl) {
-    internalState = processLine(line, internalState);
+    const cardNumber = getCardNumber(line);
+    internalState[cardNumber] = processLine(line);
   }
-  return 0;
+
+  // update the replicas
+  for (let cardNumber of Object.keys(internalState)) {
+    updateReplicas(internalState, parseInt(cardNumber));
+  }
+
+  const result = Object.values(internalState).reduce<number>((partialSum: number, cardInfo) => {
+    return partialSum + cardInfo.replicas;
+  }, 0);
+  console.log("second puzzle: ", result);
 }
 
-export function getCardNumber(line: string): number {
-  return parseInt(line.split(":")[1].trim().split(" ")[1]);
-}
-
-function processLine(
-  line: string,
-  internalState: CardInfoStore
-): CardInfoStore {
-  const newInternalState: CardInfoStore = [];
-
-  const cardNumber = getCardNumber(line);
-
-  const winningNumbers: number[] = extractNumbers(line, "winning");
-  const playedNumbers: number[] = extractNumbers(line, "played");
-
-  // playedNumbers.forEach((played) => {
-  //   if (winningNumbers.indexOf(played) !== -1) {
-  //     internalState;
-  //   }
-  // });
-
-  return newInternalState;
-}
-
-secondPuzzleSolver("04/input.toy.txt");
+secondPuzzleSolver("04/input.txt");
 processFile("04/input.txt", firstPuzzleSolver, undefined);

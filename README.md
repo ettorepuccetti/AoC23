@@ -1,27 +1,30 @@
-## Run script from shell
+# Advent of Code 2023 [Typescript]
 
-### `ts-node`
+## How to run script from shell
+
+### 1. Install dependencies
 
 ```
-npx ts-node --esm path_to_file
+npm i
 ```
 
-`--esm` is need because I have
+### 2. Provide input puzzle
 
-```json
-"type": "module"
+Every day needs to found its input puzzle in `folder_number/input.txt` (es. `01/input.txt`).
+
+### 3. Run with `tsx` (zero config typescript for node)
+
+From root folder of the project:
+
 ```
-
-in `package.json`
-
-### `tsx` (zero config typescript for node)
-
-- install with `npm i -D tsx`
-- launch with `npx tsx path_to_file`
+npx tsx path_to_file
+```
 
 ## Debug
 
-### 1. `Launch Program`
+Options to launch the scripts in debug:
+
+#### 1. `Launch Program`
 
 Defined in `.vscode/launch.json`, you need to specify there the file to debug. It produce `out/main.js`. It auto focus the terminal tab, that contains no useful output, console log are in `DEBUG CONSOLE` tab.
 

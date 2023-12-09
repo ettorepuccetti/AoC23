@@ -72,22 +72,37 @@ export function getNextNode(node: Node, direction: LeftRight): Node {
   return direction === LeftRight.Left ? node.left! : node.right!;
 }
 
-export function firstPuzzleResolver(filePath: string): void {
-  const inputLines: string[] = syncReadFile(filePath);
-  const directionSequence: LeftRight[] = buildDirectionSequence(inputLines[0]);
-  const nodeMap: Map<string, Node> = buildNodeMap(inputLines);
-
+function numberOfMovesForDestionation(
+  nodeMap: Map<string, Node>,
+  directionSequence: LeftRight[],
+  startingNode: Node,
+  isDestinationNode: (nodeName: string) => boolean
+): number {
   let moves = 0;
   let directionIndex = 0;
-  let currentNode: Node = nodeMap.get(ROOT_NODE)!;
+  let currentNode: Node = startingNode;
 
-  while (currentNode.name !== DEST_NODE) {
+  while (!isDestinationNode(currentNode.name)) {
     const direction: LeftRight =
       directionSequence[directionIndex % directionSequence.length];
     currentNode = getNextNode(currentNode, direction);
     directionIndex++;
     moves++;
   }
+  return moves;
+}
+
+export function firstPuzzleResolver(filePath: string): void {
+  const inputLines: string[] = syncReadFile(filePath);
+  const directionSequence: LeftRight[] = buildDirectionSequence(inputLines[0]);
+  const nodeMap: Map<string, Node> = buildNodeMap(inputLines);
+
+  const moves = numberOfMovesForDestionation(
+    nodeMap,
+    directionSequence,
+    nodeMap.get(ROOT_NODE)!,
+    (nodeName: string) => nodeName === DEST_NODE
+  );
 
   console.log("08: First puzzle:", moves);
 }
@@ -112,34 +127,33 @@ export function allCurrentNodesEndsInZ(currentNodes: Node[]): boolean {
   return true;
 }
 
+const gcd = (a: number, b: number): number => (a ? gcd(b % a, a) : b);
+
+const lcm = (a: number, b: number): number => (a * b) / gcd(a, b);
+
 function secondPuzzleSolver(filePath: string): void {
   const inputLines: string[] = syncReadFile(filePath);
   const directionSequence: LeftRight[] = buildDirectionSequence(inputLines[0]);
   const nodeMap: Map<string, Node> = buildNodeMap(inputLines);
 
-  let moves = 0;
-  let directionIndex = 0;
   let currentNodes: Node[] = getAllStartingNodes(inputLines).map(
     (nodeName: string) => nodeMap.get(nodeName)!
   );
 
-  while (!allCurrentNodesEndsInZ(currentNodes)) {
-    const direction: LeftRight =
-      directionSequence[directionIndex % directionSequence.length];
-    const nextCurrentNodes: Node[] = [];
-    currentNodes.forEach((node: Node) => {
-      nextCurrentNodes.push(getNextNode(node, direction));
-    });
-    currentNodes = nextCurrentNodes;
-    directionIndex++;
-    moves++;
-    if (moves % 100000000 === 0) {
-      console.log("current moves (M):", moves % 1000000);
-    }
+  const movesArray: number[] = [];
+  for (let node of currentNodes) {
+    const moves = numberOfMovesForDestionation(
+      nodeMap,
+      directionSequence,
+      node,
+      (nodeName: string) => nodeName.endsWith("Z")
+    );
+    movesArray.push(moves);
   }
 
-  console.log("08: Second puzzle:", moves);
+  const totalMoves: number = movesArray.reduce(lcm);
+  console.log("08: Second puzzle:", totalMoves);
 }
 
 firstPuzzleResolver("08/input.txt");
-secondPuzzleSolver("08/input.toy.txt");
+secondPuzzleSolver("08/input.txt");

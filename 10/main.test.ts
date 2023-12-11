@@ -11,18 +11,18 @@ import {
 describe("09", () => {
   const inputTest = [
     ".....", //do not collapse when prettier
-    ".S-7.", //do not collapse when prettier
-    ".|.|.", //do not collapse when prettier
-    ".L-J.", //do not collapse when prettier
-    ".....", //do not collapse when prettier
+    ".S-7.",
+    ".|.|.",
+    ".L-J.",
+    ".....",
   ];
 
   const inputTest2 = [
     "..F7.", //do not collapse when prettier
-    ".FJ|.", //do not collapse when prettier
-    "SJ.L7", //do not collapse when prettier
-    "|F--J", //do not collapse when prettier
-    "LJ...", //do not collapse when prettier
+    ".FJ|.",
+    "SJ.L7",
+    "|F--J",
+    "LJ...",
   ];
   it("findAnimalPosition", () => {
     expect(findAnimalPosition(inputTest)).toEqual([1, 1]);

@@ -1,3 +1,4 @@
+import { assert } from "console";
 import { createReadStream, readFileSync } from "fs";
 import { createInterface } from "readline";
 
@@ -68,4 +69,28 @@ export function syncReadFile(filename: string): string[] {
   const contents = readFileSync(filename, "utf-8");
   const arr = contents.split(/\r?\n/);
   return arr;
+}
+
+export function sumMatrices(matrix1: number[][], matrix2: number[][]) {
+  assert(matrix1.length === matrix2.length);
+  const result: number[][] = [];
+  for (let i = 0; i < matrix1.length; i++) {
+    assert(matrix1[i].length === matrix2[i].length);
+    result[i] = [];
+    for (let j = 0; j < matrix1.length; j++) {
+      result[i][j] = matrix1[i][j] + matrix2[i][j];
+    }
+  }
+  return result;
+}
+
+export function multiplyByScalarMatrix(matrix: number[][], scalar: number) {
+  const result: number[][] = [];
+  for (let i = 0; i < matrix.length; i++) {
+    result[i] = [];
+    for (let j = 0; j < matrix[i].length; j++) {
+      result[i][j] = matrix[i][j] * scalar;
+    }
+  }
+  return result;
 }

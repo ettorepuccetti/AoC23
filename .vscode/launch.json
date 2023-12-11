@@ -42,6 +42,18 @@
         // Ignore all dependencies (optional)
         "${workspaceFolder}/node_modules/**"
       ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest: current file",
+      //"env": { "NODE_ENV": "test" },
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["${fileBasenameNoExtension}", "--config", "jest.config.ts"],
+      "console": "integratedTerminal",
+      "windows": {
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      }
     }
   ]
 }

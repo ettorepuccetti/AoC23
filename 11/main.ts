@@ -1,5 +1,9 @@
 import assert from "assert";
-import { syncReadFile } from "../utils/utils";
+import {
+  multiplyByScalarMatrix,
+  sumMatrices,
+  syncReadFile,
+} from "../utils/utils";
 
 export function buildGalaxyMatrix(inputLines: string[]): number[][] {
   const matrix: number[][] = [];
@@ -17,14 +21,22 @@ export function calculateDistance(g1: number[], g2: number[]) {
   return Math.abs(g1[0] - g2[0]) + Math.abs(g1[1] - g2[1]);
 }
 
-export function buildDistanceMatrix(galaxyMatrix: number[][]) {
+function buildMatrix(
+  galaxyMatrix: number[][],
+  distanceFunction: (
+    g1: number[],
+    g2: number[],
+    auxArr1?: number[],
+    auxArr2?: number[]
+  ) => number,
+  auxArr1?: number[],
+  auxArr2?: number[]
+) {
   const matrix: number[][] = [];
 
   // preallocate matrix
   for (let [galaxyIndex, galaxy] of galaxyMatrix.entries()) {
-    matrix[galaxyIndex] = Array.from<number>({
-      length: galaxyMatrix.length,
-    });
+    matrix[galaxyIndex] = [];
   }
 
   // fill with the distances
@@ -37,13 +49,17 @@ export function buildDistanceMatrix(galaxyMatrix: number[][]) {
       neighbourIndex++
     ) {
       const neighbour = galaxyMatrix[neighbourIndex];
-      const distance = calculateDistance(galaxy, neighbour);
+      const distance = distanceFunction(galaxy, neighbour, auxArr1, auxArr2);
       matrix[galaxyIndex][neighbourIndex] = distance;
       matrix[neighbourIndex][galaxyIndex] = distance;
     }
   }
 
   return matrix;
+}
+
+export function buildDistanceMatrix(galaxyMatrix: number[][]): number[][] {
+  return buildMatrix(galaxyMatrix, calculateDistance);
 }
 
 export function findEmptyRow(inputLines: string[]): number[] {
@@ -58,7 +74,6 @@ export function findEmptyRow(inputLines: string[]): number[] {
 
 export function findEmptyColumn(inputLines: string[]): number[] {
   const emptyCol: number[] = [];
-
   for (let j = 0; j < inputLines[0].length; j++) {
     for (let i = 0; i < inputLines.length; i++) {
       if (inputLines[i][j] === "#") {
@@ -69,7 +84,6 @@ export function findEmptyColumn(inputLines: string[]): number[] {
       }
     }
   }
-
   return emptyCol;
 }
 
@@ -131,6 +145,68 @@ function firstPuzzleResolver(inputFile: string) {
   console.log("11: First puzzle: ", sum);
 }
 
-firstPuzzleResolver("11/input.txt");
+export const calculateRowAndColumnInBetween = (
+  g1: number[],
+  g2: number[],
+  emptyRowIndexes?: number[],
+  emptyColumnIndexes?: number[]
+): number => {
+  let result = 0;
 
-function secondPuzzleResolver(inputFile: string) {}
+  const [galaxySmallerRow, galaxyGratherRow] =
+    g1[0] < g2[0] ? [g1, g2] : [g2, g1];
+  const [galaxySmallerColumn, galaxyGratherColumn] =
+    g1[1] < g2[1] ? [g1, g2] : [g2, g1];
+
+  for (let i = galaxySmallerRow[0] + 1; i < galaxyGratherRow[0]; i++) {
+    if (emptyRowIndexes!.includes(i)) {
+      result++;
+    }
+  }
+
+  for (let i = galaxySmallerColumn[1] + 1; i < galaxyGratherColumn[1]; i++) {
+    if (emptyColumnIndexes!.includes(i)) {
+      result++;
+    }
+  }
+
+  return result;
+};
+
+export function buildEmptyRowColumnMatrix(
+  galaxyMatrix: number[][],
+  inputLines: string[]
+) {
+  return buildMatrix(
+    galaxyMatrix,
+    calculateRowAndColumnInBetween,
+    findEmptyRow(inputLines),
+    findEmptyColumn(inputLines)
+  );
+}
+
+function secondPuzzleResolver(inputFile: string) {
+  let inputLines = syncReadFile(inputFile);
+  const SCALAR_FACTOR = 999999;
+
+  // find galaxies and distances
+  const galaxyMatrix = buildGalaxyMatrix(inputLines);
+  const distanceMatrix = buildDistanceMatrix(galaxyMatrix);
+  const emptyRowColumnsMatrix = buildEmptyRowColumnMatrix(
+    galaxyMatrix,
+    inputLines
+  );
+
+  const distanceWithExpansionsMatrix = sumMatrices(
+    distanceMatrix,
+    multiplyByScalarMatrix(emptyRowColumnsMatrix, SCALAR_FACTOR)
+  );
+
+  //sum all the distances
+  const sum = sumDistances(distanceWithExpansionsMatrix);
+
+  console.log("11: Second puzzle: ", sum);
+}
+
+firstPuzzleResolver("11/input.txt");
+secondPuzzleResolver("11/input.txt");

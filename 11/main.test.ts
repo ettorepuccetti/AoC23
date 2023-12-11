@@ -1,10 +1,16 @@
-import { syncReadFile } from "../utils/utils";
+import {
+  multiplyByScalarMatrix,
+  sumMatrices,
+  syncReadFile,
+} from "../utils/utils";
 import {
   addEmptyColumn,
   addEmptyRow,
   buildDistanceMatrix,
+  buildEmptyRowColumnMatrix,
   buildGalaxyMatrix,
   calculateDistance,
+  calculateRowAndColumnInBetween,
   expandUniverse,
   findEmptyColumn,
   findEmptyRow,
@@ -180,5 +186,68 @@ describe("11", () => {
     expect(distanceMatrix[0][6]).toEqual(15);
     expect(distanceMatrix[2][5]).toEqual(17);
     expect(distanceMatrix[7][8]).toEqual(5);
+  });
+
+  it("rowAndColumnInBetween", () => {
+    expect(
+      calculateRowAndColumnInBetween(
+        buildGalaxyMatrix(inputLinesToy)[2],
+        buildGalaxyMatrix(inputLinesToy)[3],
+        findEmptyRow(inputLinesToy),
+        findEmptyColumn(inputLinesToy)
+      )
+    ).toEqual(3);
+  });
+
+  it("rowAndColumnInBetween 2", () => {
+    expect(
+      calculateRowAndColumnInBetween(
+        buildGalaxyMatrix(inputLinesToy)[2],
+        buildGalaxyMatrix(inputLinesToy)[6],
+        findEmptyRow(inputLinesToy),
+        findEmptyColumn(inputLinesToy)
+      )
+    ).toEqual(4);
+  });
+
+  it("check distance with scalar", () => {
+    const input = [
+      "#..", // prettier
+      "...",
+      "..#",
+    ];
+    const expectedDistanceMatrix = [
+      [0, 4],
+      [4, 0],
+    ];
+
+    const distanceMatrix = buildDistanceMatrix(buildGalaxyMatrix(input));
+    expect(distanceMatrix).toEqual(expectedDistanceMatrix);
+
+    const expectedEmptyMatrix = [
+      [0, 2],
+      [2, 0],
+    ];
+    expect(buildEmptyRowColumnMatrix(buildGalaxyMatrix(input), input)).toEqual(
+      expectedEmptyMatrix
+    );
+
+    const manuallyExpandedUniverseBy4 = [
+      "#.....", // prettier
+      "......",
+      "......",
+      "......",
+      "......",
+      ".....#",
+    ];
+    expect(
+      sumMatrices(
+        buildDistanceMatrix(buildGalaxyMatrix(input)),
+        multiplyByScalarMatrix(
+          buildEmptyRowColumnMatrix(buildGalaxyMatrix(input), input),
+          3
+        )
+      )
+    ).toEqual(buildDistanceMatrix(buildGalaxyMatrix(manuallyExpandedUniverseBy4)));
   });
 });

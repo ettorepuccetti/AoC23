@@ -2,12 +2,15 @@ import {
   Node,
   appendFailure,
   appendWorking,
+  buildRepeatedTree,
   buildTree,
+  countMatchingSequences,
   filterPotentialLeaves,
-  findFinalSequences,
   findLeaves,
   processChar,
-} from "./main";
+  repeatSequence,
+} from "./main.wrong";
+import { Solver, repeatGroups, repeatSpringRow } from "./main";
 
 describe("12", () => {
   it("array", () => {
@@ -223,15 +226,74 @@ describe("12", () => {
     });
   });
 
-  it("findFinalSequences", () => {
-    //given
-    const inputString = "???.###";
-
-    //when
-    const [root, leaves] = buildTree(inputString, "1,1,3");
-    const actual = findFinalSequences(leaves);
-
+  it("buildRepeatedTree", () => {
+    const [root, actualLeaves] = buildRepeatedTree(".?", "1", 2);
+    const prototypeLeaf: Node = {
+      value: ".",
+      inProgressFailures: 0,
+      failuresSequence: [],
+      childWorking: null,
+      childFailure: null,
+    };
     //then
-    expect(actual).toContainEqual("1,1,3");
+    const expectedLeaves: Node[] = [
+      { ...prototypeLeaf, failuresSequence: [1, 1] },
+      { ...prototypeLeaf, failuresSequence: [1] },
+      { ...prototypeLeaf, failuresSequence: [1, 1] },
+      { ...prototypeLeaf, failuresSequence: [1] },
+      { ...prototypeLeaf, failuresSequence: [1] },
+      { ...prototypeLeaf, failuresSequence: [] },
+    ];
+    expect(actualLeaves).toHaveLength(expectedLeaves.length);
+    expectedLeaves.forEach((expectedLeaf) => {
+      expect(actualLeaves).toContainEqual(expectedLeaf);
+    });
+  });
+
+  it.skip("test toy", () => {
+    const inputStrings: { inputLine: string; result: number }[] = [
+      { inputLine: "???.### 1,1,3", result: 1 },
+      { inputLine: ".??..??...?##. 1,1,3", result: 16384 },
+      { inputLine: "?#?#?#?#?#?#?#? 1,3,1,6", result: 1 },
+      { inputLine: "????.#...#... 4,1,1", result: 16 },
+      { inputLine: "????.######..#####. 1,6,5", result: 2500 },
+      { inputLine: "?###???????? 3,2,1", result: 506250 },
+    ];
+    inputStrings.forEach(({ inputLine, result }) => {
+      const [input, expectedSequence] = inputLine.split(" ");
+      const [_root, leavesOfFinalLevel]: [Node, Node[]] = buildRepeatedTree(
+        input,
+        expectedSequence,
+        5
+      );
+
+      const matchingSequences = countMatchingSequences(
+        leavesOfFinalLevel,
+        repeatSequence(expectedSequence, 5)
+      );
+      expect(matchingSequences).toEqual(result);
+    });
+  });
+
+  it("test toy", () => {
+    const inputStrings: {
+      inputLine: string;
+      groups: number[];
+      result: number;
+    }[] = [
+      { inputLine: "???.###", groups: [1, 1, 3], result: 1 },
+      { inputLine: ".??..??...?##.", groups: [1, 1, 3], result: 16384 },
+      { inputLine: "?#?#?#?#?#?#?#?", groups: [1, 3, 1, 6], result: 1 },
+      { inputLine: "????.#...#...", groups: [4, 1, 1], result: 16 },
+      { inputLine: "????.######..#####.", groups: [1, 6, 5], result: 2500 },
+      { inputLine: "?###????????", groups: [3, 2, 1], result: 506250 },
+    ];
+    inputStrings.forEach(({ inputLine, groups, result }) => {
+      const solver: Solver = new Solver(
+        repeatSpringRow(inputLine, "?", 5),
+        repeatGroups(groups, 5)
+      );
+      expect(solver.findArrangments()).toEqual(result);
+    });
   });
 });

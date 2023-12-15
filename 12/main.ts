@@ -1,132 +1,85 @@
-import { assert } from "console";
 import { syncReadFile } from "../utils/utils";
 
-export interface Node {
-  value: string;
-  inProgressFailures: number;
-  failuresSequence: number[];
-  childWorking: Node | null;
-  childFailure: Node | null;
-}
+export class Solver {
+  cache: Map<string, number> = new Map();
 
-export function findLeaves(tree: Node): Node[] {
-  const leaves: Node[] = [];
-  if (tree.childFailure === null && tree.childWorking === null) {
-    leaves.push(tree);
-  } else {
-    if (tree.childFailure) {
-      leaves.push(...findLeaves(tree.childFailure));
-    }
-    if (tree.childWorking) {
-      leaves.push(...findLeaves(tree.childWorking));
-    }
+  inputString: string;
+  groups: number[];
+
+  constructor(inputString: string, groups: number[]) {
+    this.inputString = inputString;
+    this.groups = groups;
   }
-  return leaves;
-}
 
-export function appendFailure(leaf: Node) {
-  const newLeaf: Node = {
-    value: "#",
-    inProgressFailures: leaf.inProgressFailures + 1,
-    failuresSequence: leaf.failuresSequence,
-    childWorking: null,
-    childFailure: null,
-  };
-  leaf.childFailure = newLeaf;
-  return newLeaf;
-}
-
-export function appendWorking(leaf: Node) {
-  let newFailuresSequence: number[];
-
-  if (leaf.inProgressFailures > 0) {
-    assert(leaf.value === "#");
-    newFailuresSequence = leaf.failuresSequence.concat(leaf.inProgressFailures);
-  } else {
-    assert(leaf.value === ".");
-    newFailuresSequence = leaf.failuresSequence;
-  }
-  const newLeaf: Node = {
-    value: ".",
-    inProgressFailures: 0,
-    failuresSequence: newFailuresSequence,
-    childWorking: null,
-    childFailure: null,
-  };
-
-  leaf.childWorking = newLeaf;
-  return newLeaf;
-}
-
-export function filterPotentialLeaves(
-  leaves: Node[],
-  expectedSequence: string
-): Node[] {
-  const result = [];
-  for (let leaf of leaves) {
-    if (
-      leaf.failuresSequence.toString() ===
-      expectedSequence.substring(0, leaf.failuresSequence.toString().length)
+  findArrangments(strStartIndex: number = 0, groupIndex: number = 0): number {
+    let possibleArrang = 0;
+    const group: number = this.groups[groupIndex];
+    const slidingWindowLastIndex =
+      this.inputString.length - this.groups[groupIndex] + 1;
+    for (
+      let strCurrentIndex = strStartIndex;
+      strCurrentIndex < slidingWindowLastIndex;
+      strCurrentIndex++
     ) {
-      result.push(leaf);
+      const slidingWindow = this.inputString.slice(
+        strCurrentIndex,
+        strCurrentIndex + group
+      );
+      const nextStringIndex = strCurrentIndex + group;
+
+      // still valid arrangment (no dot)
+      if (!slidingWindow.includes(".")) {
+        // if it is the last group to consider
+        if (groupIndex === this.groups.length - 1) {
+          // and no more assignments to do (string end or no more # until the end)
+          if (
+            nextStringIndex === this.inputString.length ||
+            !this.inputString.slice(nextStringIndex).includes("#")
+          ) {
+            possibleArrang++;
+          }
+        }
+        // if there is still a substring after the current separator, recursively try to assing the remaining groups.
+        else if (
+          nextStringIndex < this.inputString.length &&
+          this.inputString.at(nextStringIndex) !== "#"
+        ) {
+          possibleArrang += this.cacheFindArrang(
+            nextStringIndex + 1,
+            groupIndex + 1
+          )!;
+        }
+      }
+      if (slidingWindow.startsWith("#")) {
+        break;
+      }
     }
+    return possibleArrang;
   }
-  return result;
+
+  cacheFindArrang(...args: number[]) {
+    const input: string = JSON.stringify(args);
+    if (!this.cache.has(input)) {
+      // console.log("cache MISS", "input", input);
+      this.cache.set(input, this.findArrangments(...args));
+    } else {
+      // console.log("cache HIT", "input", input);
+    }
+    return this.cache.get(input);
+  }
 }
 
-export const processChar = (
-  char: string,
-  node: Node,
-  expectedSequence: string
-): Node[] => {
-  const newLeaves: Node[] = [];
-  if (char === ".") {
-    newLeaves.push(appendWorking(node));
-  }
-  if (char === "#") {
-    newLeaves.push(appendFailure(node));
-  }
-
-  if (char === "?") {
-    newLeaves.push(appendWorking(node));
-    newLeaves.push(appendFailure(node));
-  }
-  return filterPotentialLeaves(newLeaves, expectedSequence);
-};
-
-export function buildTree(
-  inputString: string,
-  expectedSequence: string
-): [Node, Node[]] {
-  inputString = inputString.concat(".");
-  const root: Node = {
-    value: ".",
-    inProgressFailures: 0,
-    failuresSequence: [],
-    childWorking: null,
-    childFailure: null,
-  };
-
-  let leaves: Node[] = [root];
-
-  for (let char of inputString) {
-    let newLeaves: Node[] = [];
-    for (let leaf of leaves) {
-      newLeaves = newLeaves.concat(processChar(char, leaf, expectedSequence));
-    }
-    leaves = newLeaves;
-  }
-
-  return [root, leaves];
+export function repeatSpringRow(
+  springRow: string,
+  separator: string,
+  repetitions: number
+) {
+  return Array(repetitions).fill(springRow).join(separator);
 }
 
-export const findFinalSequences = (leaves: Node[]): string[] => {
-  const finalSequences: string[] = [];
-  for (let leaf of leaves) {
-    finalSequences.push(leaf.failuresSequence.toString());
-  }
-  return finalSequences;
-};
+export function repeatGroups(groups: number[], repetitions: number) {
+  return Array(repetitions).fill(groups).flat();
+}
 
 function firstPuzzleResolver(filePath: string) {
   const inputLines: string[] = syncReadFile(filePath).filter(
@@ -134,14 +87,41 @@ function firstPuzzleResolver(filePath: string) {
   );
   let result = 0;
   for (let inputLine of inputLines) {
-    const fieldMap = inputLine.split(" ")[0];
-    const expectedSequence = inputLine.split(" ")[1];
-    const [root, leaves] = buildTree(fieldMap, expectedSequence);
-    result += findFinalSequences(leaves).filter(
-      (sequence) => sequence === expectedSequence
-    ).length;
+    const [inputSequence, expectedSequence] = inputLine.split(" ");
+    const groups: number[] = expectedSequence
+      .split(",")
+      .map((s: string) => parseInt(s));
+
+    const solver: Solver = new Solver(
+      repeatSpringRow(inputSequence, "?", 1),
+      repeatGroups(groups, 1)
+    );
+
+    result += solver.cacheFindArrang(0, 0)!;
   }
   console.log("12: First puzzle: ", result);
 }
 
+function secondPuzzleResolver(filePath: string) {
+  const inputLines: string[] = syncReadFile(filePath).filter(
+    (line) => line.length > 0
+  );
+  let result = 0;
+  for (let inputLine of inputLines) {
+    const [inputSequence, expectedSequence] = inputLine.split(" ");
+    const groups: number[] = expectedSequence
+      .split(",")
+      .map((s: string) => parseInt(s));
+
+    const solver: Solver = new Solver(
+      repeatSpringRow(inputSequence, "?", 5),
+      repeatGroups(groups, 5)
+    );
+
+    result += solver.cacheFindArrang(0, 0)!;
+  }
+  console.log("12: Second puzzle: ", result);
+}
+
 firstPuzzleResolver("12/input.txt");
+secondPuzzleResolver("12/input.txt");

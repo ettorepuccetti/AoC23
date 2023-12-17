@@ -194,4 +194,4 @@ function secondPuzzleResolver(filePath: string) {
 }
 
 firstPuzzleResolver("05/input.txt");
-secondPuzzleResolver("05/input.txt");
+//secondPuzzleResolver("05/input.txt");

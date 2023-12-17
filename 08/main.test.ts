@@ -80,6 +80,6 @@ describe("08", () => {
         { name: "21Z" },
         { name: "2Z1" },
       ])
-    ).toEqual(true);
+    ).toEqual(false);
   });
 });

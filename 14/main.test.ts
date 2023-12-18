@@ -4,6 +4,11 @@ import {
   countRocksDistance,
   moveRocksRowToRight,
   moveRocksRowtoLeft,
+  spinCycle,
+  tiltEast,
+  tiltNorth,
+  tiltSouth,
+  tiltWest,
 } from "./main";
 
 const inputToy = [
@@ -33,7 +38,6 @@ describe("14", () => {
   });
 
   it("tiltNorth", () => {
-    const solver: Solver = new Solver(inputToy);
     const expected = [
       "OOOO.#.O..",
       "OO..#....#",
@@ -46,8 +50,7 @@ describe("14", () => {
       "#....###..",
       "#....#....",
     ];
-    solver.tiltNorth();
-    expect(solver.matrix).toEqual(expected);
+    expect(tiltNorth(inputToy)).toEqual(expected);
   });
 
   it("tiltWest", () => {
@@ -63,8 +66,7 @@ describe("14", () => {
       ".##.",
       "O...",
     ];
-    const solver: Solver = new Solver(input);
-    expect(solver.tiltWest().matrix).toEqual(expected);
+    expect(tiltWest(input)).toEqual(expected);
   });
 
   it("tiltSouth", () => {
@@ -81,7 +83,7 @@ describe("14", () => {
       "O.OO",
     ];
     const solver: Solver = new Solver(input);
-    expect(solver.tiltSouth().matrix).toEqual(expected);
+    expect(tiltSouth(input)).toEqual(expected);
   });
 
   it("tiltEast", () => {
@@ -97,6 +99,7 @@ describe("14", () => {
       ".##.",
       "...O",
     ];
+    expect(tiltEast(input)).toEqual(expected);
   });
 
   it("tiltNorth and tiltWest", () => {
@@ -112,10 +115,7 @@ describe("14", () => {
       "O...",
       "....",
     ];
-    const solver: Solver = new Solver(input);
-    const result = solver.tiltNorth().tiltWest().matrix;
-    console.log("result", result);
-    expect(result).toEqual(expected);
+    expect(tiltWest(tiltNorth(input))).toEqual(expected);
   });
 
   it("spinCycle", () => {
@@ -132,25 +132,40 @@ describe("14", () => {
       "#...O###..",
       "#..OO#....",
     ];
-    solver.spinCycle();
-    expect(solver.matrix).toEqual(expected);
+    expect(spinCycle(inputToy)).toEqual(expected);
   });
 
+  const expectedAfterThreeCycles = [
+    ".....#....",
+    "....#...O#",
+    ".....##...",
+    "..O#......",
+    ".....OOO#.",
+    ".O#...O#.#",
+    "....O#...O",
+    ".......OOO",
+    "#...O###.O",
+    "#.OOO#...O",
+  ];
+
   it("spinCycle three times", () => {
+    const actual = spinCycle(spinCycle(spinCycle(inputToy)));
+    expect(actual).toEqual(expectedAfterThreeCycles);
+  });
+
+  it("checkLoopSkipping", () => {
     const solver: Solver = new Solver(inputToy);
-    const expected = [
-      ".....#....",
-      "....#...O#",
-      ".....##...",
-      "..O#......",
-      ".....OOO#.",
-      ".O#...O#.#",
-      "....O#...O",
-      ".......OOO",
-      "#...O###.O",
-      "#.OOO#...O",
-    ];
-    solver.spinCycle().spinCycle().spinCycle();
-    expect(solver.matrix).toEqual(expected);
+    solver.findLoopStartAndLength();
+
+    let result: string[] = inputToy;
+    let statusAtLoopStart: string[];
+    for (let i = 0; i <= solver.loopStart; i++) {
+      result = spinCycle(result);
+    }
+    statusAtLoopStart = result;
+    for (let i = 0; i < solver.loopLength; i++) {
+      result = spinCycle(result);
+    }
+    expect(result).toEqual(statusAtLoopStart);
   });
 });

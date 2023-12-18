@@ -74,6 +74,47 @@ export function moveRocksRowtoLeft(line: string) {
   return result.join("").slice(1);
 }
 
+export function tiltNorth(input: readonly string[]) {
+  const inputLinesFlipped = flipMatrixClockwise(input);
+  const result = [];
+  for (let line of inputLinesFlipped) {
+    result.push(moveRocksRowToRight(line));
+  }
+  return flipMatrixCounterClockwise(result);
+}
+
+export function tiltWest(input: readonly string[]) {
+  const result = [];
+  for (let line of input) {
+    result.push(moveRocksRowtoLeft(line));
+  }
+  return result;
+}
+
+export function tiltSouth(input: readonly string[]) {
+  const inputLinesFlipped = flipMatrixClockwise(input);
+  const result = [];
+  for (let line of inputLinesFlipped) {
+    result.push(moveRocksRowtoLeft(line));
+  }
+  return flipMatrixCounterClockwise(result);
+}
+
+export function tiltEast(input: readonly string[]) {
+  const result = [];
+  for (let line of input) {
+    result.push(moveRocksRowToRight(line));
+  }
+  return result;
+}
+
+export function spinCycle(input: readonly string[]) {
+  let auxMatrix = tiltNorth(input);
+  auxMatrix = tiltWest(auxMatrix);
+  auxMatrix = tiltSouth(auxMatrix);
+  return tiltEast(auxMatrix);
+}
+
 export class Solver {
   matrix: string[];
   loopLength: number = 0;
@@ -82,63 +123,18 @@ export class Solver {
     this.matrix = input;
   }
 
-  tiltNorth() {
-    const inputLinesFlipped = flipMatrixClockwise(this.matrix);
-    const result = [];
-    for (let line of inputLinesFlipped) {
-      result.push(moveRocksRowToRight(line));
-    }
-    this.matrix = flipMatrixCounterClockwise(result);
-    return this;
-  }
-
-  tiltWest() {
-    const result = [];
-    for (let line of this.matrix) {
-      result.push(moveRocksRowtoLeft(line));
-    }
-    this.matrix = result;
-    return this;
-  }
-
-  tiltSouth() {
-    const inputLinesFlipped = flipMatrixClockwise(this.matrix);
-    const result = [];
-    for (let line of inputLinesFlipped) {
-      result.push(moveRocksRowtoLeft(line));
-    }
-    this.matrix = flipMatrixCounterClockwise(result);
-    return this;
-  }
-
-  tiltEast() {
-    const result = [];
-    for (let line of this.matrix) {
-      result.push(moveRocksRowToRight(line));
-    }
-    this.matrix = result;
-    return this;
-  }
-
-  spinCycle() {
-    this.tiltNorth();
-    this.tiltWest();
-    this.tiltSouth();
-    this.tiltEast();
-    return this;
-  }
-
-  private findLoopStartAndLength() {
+  findLoopStartAndLength() {
     let loopLength = 0;
     const seenStates: string[] = [];
+    let status = this.matrix;
     while (this.loopLength === 0) {
-      loopLength++;
-      this.spinCycle();
-      if (seenStates.includes(JSON.stringify(this.matrix))) {
-        this.loopStart = seenStates.indexOf(JSON.stringify(this.matrix));
-        this.loopLength = loopLength + 1 - this.loopStart;
+      status = spinCycle(status);
+      if (seenStates.includes(JSON.stringify(status))) {
+        this.loopStart = seenStates.indexOf(JSON.stringify(status));
+        this.loopLength = loopLength - this.loopStart;
       } else {
-        seenStates.push(JSON.stringify(this.matrix));
+        seenStates.push(JSON.stringify(status));
+        loopLength++;
       }
     }
   }
@@ -148,9 +144,8 @@ export class Solver {
     const lastCyclesToDo = (n - this.loopStart) % this.loopLength;
     const actualCyclesTodo = this.loopStart + lastCyclesToDo;
     for (let i = 0; i < actualCyclesTodo; i++) {
-      this.spinCycle();
+      this.matrix = spinCycle(this.matrix);
     }
-    return this;
   }
 
   calculateNorthBeamLoad() {
@@ -174,4 +169,4 @@ function secondPuzzleSolver(fileInput: string) {
   console.log("Second puzzle: ", solver.calculateNorthBeamLoad());
 }
 
-secondPuzzleSolver("14/input.toy.txt");
+secondPuzzleSolver("14/input.txt");

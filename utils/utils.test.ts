@@ -1,4 +1,9 @@
-import { multiplyByScalarMatrix, sumMatrices } from "./utils";
+import {
+  flipMatrix,
+  flipMatrixCounterClockwise,
+  multiplyByScalarMatrix,
+  sumMatrices,
+} from "./utils";
 
 describe("utils", () => {
   it("sumMatrices", () => {
@@ -33,5 +38,23 @@ describe("utils", () => {
       [50, 60, 70, 0],
     ];
     expect(multiplyByScalarMatrix(matrix, scalar)).toEqual(expected);
+  });
+
+  it("flipMatrix", () => {
+    const input = [
+      ".#..", //0
+      "....", //1
+      "####", //2
+      "...#", //3
+      "..##", //4
+    ];
+    const expected = [
+      "..#..", //prettier
+      "..#.#",
+      "#.#..",
+      "###..",
+    ];
+    expect(flipMatrix(input)).toEqual(expected);
+    expect(flipMatrixCounterClockwise(expected)).toEqual(input);
   });
 });

@@ -1,3 +1,4 @@
+import { flipMatrix } from "../utils/utils";
 import {
   Solver,
   SolverSmudge,
@@ -5,7 +6,6 @@ import {
   compareRowsBinary,
   encodeMatrixBinary,
   encodeRow,
-  flipMatrix,
   verifyMirror,
   verifyMirrorSmudge,
 } from "./main";
@@ -18,16 +18,6 @@ const input = [
 ];
 
 describe("13", () => {
-  it("rotateMatrix", () => {
-    const expected = [
-      "..#..", //prettier
-      "..#.#",
-      "#.#..",
-      "###..",
-    ];
-    expect(flipMatrix(input)).toEqual(expected);
-  });
-
   it("encodeRow", () => {
     expect(encodeRow(input[0])).toEqual([0, 1, 1, 2]);
     expect(encodeRow(input[1])).toEqual([0, 4]);

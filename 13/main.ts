@@ -1,14 +1,6 @@
-import { syncReadFile } from "../utils/utils";
+import { flipMatrix, syncReadFile } from "../utils/utils";
 
-export function flipMatrix(matrix: string[]): string[] {
-  const rotated: string[] = Array(matrix[0].length).fill("");
-  for (let row of matrix) {
-    for (let [index, char] of row.split("").entries()) {
-      rotated[index] = char + rotated[index];
-    }
-  }
-  return rotated;
-}
+
 
 export function encodeRow(row: string): number[] {
   let counterLastSeen = 0;

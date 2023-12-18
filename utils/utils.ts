@@ -94,3 +94,24 @@ export function multiplyByScalarMatrix(matrix: number[][], scalar: number) {
   }
   return result;
 }
+
+export function flipMatrix(matrix: string[]): string[] {
+  const flipped: string[] = Array(matrix[0].length).fill("");
+  for (let row of matrix) {
+    for (let [index, char] of row.split("").entries()) {
+      flipped[index] = char + flipped[index];
+    }
+  }
+  return flipped;
+}
+
+export function flipMatrixCounterClockwise(matrix: string[]): string[] {
+  const rowLength = matrix[0].length;
+  const flipped: string[] = Array(rowLength).fill("");
+  for (let row of matrix) {
+    for (let [index, char] of row.split("").entries()) {
+      flipped[rowLength - index - 1] = flipped[rowLength - index - 1] + char;
+    }
+  }
+  return flipped;
+}
